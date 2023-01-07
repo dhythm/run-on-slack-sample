@@ -14,7 +14,6 @@ export default Manifest({
   workflows: [CreateTimeOffRequestWorkflow],
   functions: [SendTimeOffRequestToManagerFunction],
   outgoingDomains: [],
-  datastores: [],
   botScopes: [
     "commands",
     "chat:write",

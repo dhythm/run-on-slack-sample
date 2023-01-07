@@ -46,7 +46,7 @@ To create a Link Trigger for the Workflow in this template, run the following
 command:
 
 ```zsh
-$ slack trigger create --trigger-def triggers/sample_trigger.ts
+$ slack trigger create --trigger-def triggers/trigger.ts
 ```
 
 After selecting a Workspace, the output provided will include the Link Trigger
