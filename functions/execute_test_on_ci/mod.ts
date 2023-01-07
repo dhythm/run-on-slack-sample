@@ -1,7 +1,7 @@
 import { ExecuteTestOnCiFunction } from "./definition.ts";
 import { SlackAPI } from "deno-slack-api/mod.ts";
 import { SlackFunction } from "deno-slack-sdk/mod.ts";
-import executeTestHeaderBlocks from "./blocks.ts";
+import executionTestHeaderBlocks from "./blocks.ts";
 
 // Custom function that sends a message to the user's manager asking
 // for approval for the time off request. The message includes some Block Kit with two
