@@ -37,7 +37,7 @@ const formData = ExecuteTestOnCiWorkflow.addStep(
           title: "Branch",
           type: Schema.types.array,
           items: {
-            type: Schema.slack.types.string,
+            type: Schema.types.string,
             enum: ["main", "qa"]
           },
           default: ["main"]
@@ -53,7 +53,7 @@ const formData = ExecuteTestOnCiWorkflow.addStep(
 );
 
 // Step 2: execute a test.
-ExecuteTestOnCiWorkflow.addStep(SendTimeOffRequestToManagerFunction, {
+ExecuteTestOnCiWorkflow.addStep(ExecuteTestOnCiFunction, {
   interactivity: formData.outputs.interactivity,
   interactor: ExecuteTestOnCiWorkflow.inputs.interactivity.interactor.id,
   branch: formData.outputs.fields.branch,
