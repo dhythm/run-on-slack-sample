@@ -1,6 +1,6 @@
 import { Manifest } from "deno-slack-sdk/mod.ts";
-import SampleWorkflow from "./workflows/sample_workflow.ts";
-import SampleObjectDatastore from "./datastores/sample_datastore.ts";
+import { CreateTimeOffRequestWorkflow } from "./workflows/CreateTimeOffRequestWorkflow.ts";
+import { SendTimeOffRequestToManagerFunction } from './functions/send_time_off_request_to_manager/definition.ts'
 
 /**
  * The app manifest contains the app's configuration. This
@@ -8,12 +8,13 @@ import SampleObjectDatastore from "./datastores/sample_datastore.ts";
  * https://api.slack.com/future/manifest
  */
 export default Manifest({
-  name: "run-on-slack-sample",
-  description: "A template for building Slack apps with Deno",
+  name: "Request Time Off",
+  description: "Ask your manager for some time off",
   icon: "assets/default_new_app_icon.png",
-  workflows: [SampleWorkflow],
+  workflows: [CreateTimeOffRequestWorkflow],
+  functions: [SendTimeOffRequestToManagerFunction],
   outgoingDomains: [],
-  datastores: [SampleObjectDatastore],
+  datastores: [],
   botScopes: [
     "commands",
     "chat:write",

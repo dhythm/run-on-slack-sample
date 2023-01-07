@@ -1,13 +1,10 @@
-# Deno Starter Template
+# Run-on-Slack Sample
 
-This is a scaffolded Deno template used to build out Slack apps using the Slack
-CLI.
+This is a sample app used to build out Slack apps using the Slack CLI.
 
 **Guide Outline**:
 
 - [Setup](#setup)
-  - [Install the Slack CLI](#install-the-slack-cli)
-  - [Clone the Template](#clone-the-template)
 - [Create a Link Trigger](#create-a-link-trigger)
 - [Running Your Project Locally](#running-your-project-locally)
 - [Datastores](#datastores)
@@ -21,27 +18,10 @@ CLI.
 
 ## Setup
 
-Before getting started, make sure you have a development workspace where you
-have permissions to install apps. If you don’t have one set up, go ahead and
-[create one](https://slack.com/create). Also, please note that the workspace
-requires any of [the Slack paid plans](https://slack.com/pricing).
+https://api.slack.com/tutorials/tracks/building-approval-workflows
 
-### Install the Slack CLI
-
-To use this template, you first need to install and configure the Slack CLI.
-Step-by-step instructions can be found in our
-[Quickstart Guide](https://api.slack.com/future/quickstart).
-
-### Clone the Template
-
-Start by cloning this repository:
-
-```zsh
-# Clone this project onto your machine
-$ slack create my-app -t slack-samples/deno-starter-template
-
-# Change into this project directory
-$ cd my-app
+```
+slack create run-on-slack-sample
 ```
 
 ## Create a Link Trigger
