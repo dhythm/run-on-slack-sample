@@ -36,10 +36,9 @@ const formData = ExecuteTestOnCiWorkflow.addStep(
           name: "branch",
           title: "Branch",
           type: Schema.types.string,
-          enum: ["main", "qa"],
+          enum: ["main"],
           choices: [
             { value: "main", title: "main" },
-            { value: "qa", title: "qa" },
           ]
         },
         {

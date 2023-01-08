@@ -9,19 +9,18 @@ import executionTestHeaderBlocks from "./blocks.ts";
 // interactive buttons: one to approve, and one to deny.
 export default SlackFunction(
   ExecuteTestOnCiFunction,
-  async ({ inputs, token }) => {
+  async ({ inputs, token, env }) => {
     console.log("Forwarding the following execution test:", inputs);
     const client = SlackAPI(token, {});
 
     // Create a block of Block Kit elements composed of several header blocks
     // plus the interactive approve/deny buttons at the end
     const blocks = executionTestHeaderBlocks(inputs);
-    console.log('--------------------\n' + JSON.stringify(blocks) + '\n--------------------')
 
     // https://docs.github.com/en/rest/branches/branches#list-branches
     // https://api.slack.com/tutorials/tracks/create-github-issues-in-workflows
-    const branchesEndpoint = `https://api.github.com/repos/${env.GITHUB_ACCOUNT_NAME}/${env.GITHUB_REPOSITORY_NAME}/branches`
-    const branchesResponse = await fetch(branchesEndpoint, {
+    const branchEndpoint = `https://api.github.com/repos/${env.GITHUB_ACCOUNT_NAME}/${env.GITHUB_REPOSITORY_NAME}/branches/${inputs.branch}`
+    const branchResponse = await fetch(branchEndpoint, {
       method: "GET",
       headers: {
         Accept: "application/vnd.github+json",
@@ -29,15 +28,13 @@ export default SlackFunction(
         "Content-Type": "application/json",
       },
     })
-    const branchesStatus = branchesResponse.status;
-    if (branchesStatus !== 200) {
-      console.log("[ERROR] Gettting branches is failed.", branchesStatus);
+    const branchStatus = branchResponse.status;
+    if (branchStatus !== 200) {
+      console.log("[ERROR] Branch is NOT found.", branchStatus);
       return {
         completed: false,
       }
     }
-    const branches = await branchesResponse.json();
-    console.log('--------------------\n' + JSON.stringify(branches) + '\n--------------------')
 
     const ciEndpoint = `https://circleci.com/api/v2/project/gh/${env.GITHUB_ACCOUNT_NAME}/${env.GITHUB_REPOSITORY_NAME}/pipeline`;
     const encodedCiToken = new Buffer(new TextEncoder().encode(env.CIRCLE_CI_TOKEN + ":")).toString('base64');
@@ -55,7 +52,7 @@ export default SlackFunction(
     })
     const ciStatus = ciResponse.status
     if (ciStatus !== 200) {
-      console.log("[ERROR] Executing E2E test is failed.", ciStatus);
+      console.log("[ERROR] Executing E2E test is failed.", ciResponse);
       return {
         completed: false,
       }
