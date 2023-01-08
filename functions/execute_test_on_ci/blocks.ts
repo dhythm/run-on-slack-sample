@@ -19,7 +19,7 @@ export default function executionTestHeaderBlocks(inputs: any): any[] {
       type: "section",
       text: {
         type: "mrkdwn",
-        text: `*Execution Date:* ${Date.now().toString()}`,
+        text: `*Execution Date:* ${inputs.createdAt}`,
       },
     },
     {

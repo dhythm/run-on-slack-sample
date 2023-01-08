@@ -13,10 +13,6 @@ export default SlackFunction(
     console.log("Forwarding the following execution test:", inputs);
     const client = SlackAPI(token, {});
 
-    // Create a block of Block Kit elements composed of several header blocks
-    // plus the interactive approve/deny buttons at the end
-    const blocks = executionTestHeaderBlocks(inputs);
-
     // https://docs.github.com/en/rest/branches/branches#list-branches
     // https://api.slack.com/tutorials/tracks/create-github-issues-in-workflows
     const branchEndpoint = `https://api.github.com/repos/${env.GITHUB_ACCOUNT_NAME}/${env.GITHUB_REPOSITORY_NAME}/branches/${inputs.branch}`
@@ -32,17 +28,18 @@ export default SlackFunction(
     if (branchStatus !== 200) {
       console.log("[ERROR] Branch is NOT found.", branchStatus);
       return {
-        completed: false,
+        completed: true,
       }
     }
 
     const ciEndpoint = `https://circleci.com/api/v2/project/gh/${env.GITHUB_ACCOUNT_NAME}/${env.GITHUB_REPOSITORY_NAME}/pipeline`;
-    const encodedCiToken = new Buffer(new TextEncoder().encode(env.CIRCLE_CI_TOKEN + ":")).toString('base64');
+    const base64CiToken = btoa(env.CIRCLE_CI_TOKEN + ":")
+    console.log(base64CiToken)
 
     const ciResponse = await fetch(ciEndpoint, {
       method: "POST",
       headers: {
-        Authorization: `Basic ${encodedCiToken}`,
+        Authorization: `Basic ${base64CiToken}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -51,33 +48,36 @@ export default SlackFunction(
       })
     })
     const ciStatus = ciResponse.status
-    if (ciStatus !== 200) {
+    if (ciStatus !== 201) {
       console.log("[ERROR] Executing E2E test is failed.", ciResponse);
       return {
-        completed: false,
+        completed: true,
       }
     }
-    const ciResult = await ciRes.json()
-    console.log('--------------------\n' + JSON.stringify(ciResult) + '\n--------------------')
+    const ciResult = await ciResponse.json()
+    const createdAt = ciResult?.['created_at'] ?? new Date(Date.now()).toISOString();
 
+    // Create a block of Block Kit elements composed of several header blocks
+    // plus the interactive approve/deny buttons at the end
+    const blocks = executionTestHeaderBlocks({ ...inputs, createdAt });
 
     // Send the message to the manager
     const msgResponse = await client.chat.postMessage({
-      channel: inputs.manager,
+      channel: inputs.interactivity.interactor.id,
       blocks,
       // Fallback text to use when rich media can't be displayed (i.e. notifications) as well as for screen readers
-      text: "execution test has been submitted",
+      text: "Test starts to execute",
     });
 
     if (!msgResponse.ok) {
       console.log("Error during request chat.postMessage!", msgResponse.error);
+      return {
+        completed: true,
+      }
     }
 
-    // IMPORTANT! Set `completed` to false in order to keep the interactivity
-    // points (the approve/deny buttons) "alive"
-    // We will set the function's complete state in the button handlers below.
     return {
-      completed: false,
+      completed: true,
     };
   },
 );
