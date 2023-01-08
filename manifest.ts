@@ -35,7 +35,5 @@ export default Manifest({
     "commands",
     "chat:write",
     "chat:write.public",
-    "datastore:read",
-    "datastore:write",
   ],
 });

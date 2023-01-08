@@ -24,6 +24,21 @@ https://api.slack.com/tutorials/tracks/building-approval-workflows
 slack create run-on-slack-sample
 ```
 
+Set environment variables by the following command.
+
+```sh
+slack env add <KEY> <VALUE>
+```
+
+Then, you can use the variables as,
+
+```ts
+env.KEY
+```
+
+For development mode, you have to create `.env` file at the root directory.
+
+
 ## Create a Link Trigger
 
 [Triggers](https://api.slack.com/future/triggers) are what cause Workflows to
