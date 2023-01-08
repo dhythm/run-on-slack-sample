@@ -3,7 +3,6 @@ import { SlackAPI } from "deno-slack-api/mod.ts";
 import { SlackFunction } from "deno-slack-sdk/mod.ts";
 import { Buffer } from "https://deno.land/std/io/buffer.ts";
 import executionTestHeaderBlocks from "./blocks.ts";
-import { Octokit } from 'https://cdn.skypack.dev/octokit';
 
 // Custom function that sends a message to the user's manager asking
 // for approval for the time off request. The message includes some Block Kit with two
@@ -19,32 +18,51 @@ export default SlackFunction(
     const blocks = executionTestHeaderBlocks(inputs);
     console.log('--------------------\n' + JSON.stringify(blocks) + '\n--------------------')
 
-    const url = `https://circleci.com/api/v2/project/gh/${env.GITHUB_ACCOUNT_NAME}/${env.GITHUB_REPOSITORY_NAME}/pipeline`;
-    const data = {
-      branch: `${inputs.branch}`,
-      parameters: { manual_execution: true },
+    // https://docs.github.com/en/rest/branches/branches#list-branches
+    // https://api.slack.com/tutorials/tracks/create-github-issues-in-workflows
+    const branchesEndpoint = `https://api.github.com/repos/${env.GITHUB_ACCOUNT_NAME}/${env.GITHUB_REPOSITORY_NAME}/branches`
+    const branchesResponse = await fetch(branchesEndpoint, {
+      method: "GET",
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: "Bearer " + env.GITHUB_TOKEN,
+        "Content-Type": "application/json",
+      },
+    })
+    const branchesStatus = branchesResponse.status;
+    if (branchesStatus !== 200) {
+      console.log("[ERROR] Gettting branches is failed.", branchesStatus);
+      return {
+        completed: false,
+      }
     }
+    const branches = await branchesResponse.json();
+    console.log('--------------------\n' + JSON.stringify(branches) + '\n--------------------')
+
+    const ciEndpoint = `https://circleci.com/api/v2/project/gh/${env.GITHUB_ACCOUNT_NAME}/${env.GITHUB_REPOSITORY_NAME}/pipeline`;
     const encodedCiToken = new Buffer(new TextEncoder().encode(env.CIRCLE_CI_TOKEN + ":")).toString('base64');
 
-    const res = await fetch(url, {
+    const ciResponse = await fetch(ciEndpoint, {
       method: "POST",
       headers: {
         Authorization: `Basic ${encodedCiToken}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify({
+        branch: `${inputs.branch}`,
+        parameters: { manual_execution: true },
+      })
     })
-    console.log('--------------------\n' + JSON.stringify(res) + '\n--------------------')
+    const ciStatus = ciResponse.status
+    if (ciStatus !== 200) {
+      console.log("[ERROR] Executing E2E test is failed.", ciStatus);
+      return {
+        completed: false,
+      }
+    }
+    const ciResult = await ciRes.json()
+    console.log('--------------------\n' + JSON.stringify(ciResult) + '\n--------------------')
 
-    // https://docs.github.com/en/rest/branches/branches#list-branches
-    const octokit = new OctoKit({
-      auth: env.GITHUB_TOKEN,
-    })
-    const branches = await octokit.request(`GET /repos/${env.GITHUB_ACCOUNT_NAME}/${env.GITHUB_REPOSITORY_NAME}/branches`, {
-      owner: env.GITHUB_ACCOUNT_NAME,
-      repo: env.GITHUB_REPOSITORY_NAME,
-    })
-    console.log('--------------------\n' + JSON.stringify(branches) + '\n--------------------')
 
     // Send the message to the manager
     const msgResponse = await client.chat.postMessage({

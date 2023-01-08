@@ -30,7 +30,10 @@ export default Manifest({
   icon: "assets/default_new_app_icon.png",
   workflows: [ExecuteTestOnCiWorkflow],
   functions: [ExecuteTestOnCiFunction],
-  outgoingDomains: [],
+  outgoingDomains: [
+    "api.github.com",
+    "circleci.com",
+  ],
   botScopes: [
     "commands",
     "chat:write",
